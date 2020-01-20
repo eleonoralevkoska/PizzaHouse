@@ -1,0 +1,115 @@
+﻿@using System.Security.Claims
+@{
+    var user = Context.User;
+    var isLoggedIn = user.FindFirst(ClaimTypes.Name) != null;
+    var isAdmin = isLoggedIn && Context.User.HasClaim(ClaimTypes.Role, "Administrator");
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Pizza Restaurant</title>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a asp-area="" asp-controller="Pizza" asp-action="Menu" class="navbar-brand">Menu</a>
+
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav" style="width: 80%">
+                    <a asp-controller="Ingredient" asp-action="ListAllIngredients" class="navbar-brand">Ingredients</a>
+                    @if (isLoggedIn)
+                    {
+                        if (!isAdmin)
+                        {
+                            <a asp-controller="Order" asp-action="Create" class="navbar-brand">Make an order</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Order" asp-action="List" class="navbar-brand">Orders</a>
+                        }
+                        <a asp-controller="User" asp-action="Logout" class="navbar-brand pull-right">Logout</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="User" asp-action="Login" class="navbar-brand pull-right">Login</a>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+    @if (isLoggedIn)
+    {
+        <div>
+            <p class="pull-right" style="margin-right: 15%" id="name-label"></p>
+        </div>
+    }
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - SEDC</p>
+        </footer>
+    </div>
+
+
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
+                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
+        </script>
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: 'GET',
+                url: '/User/GetName',
+                success: function (name) {
+                    $('#name-label').text(name);
+                },
+                error: function (jqXHR, status, err) {//status is Error and the errorThrown is undefined
+                    console.log('Request Status : ' + jqXHR.status + ' has issued a status text of  : ' + jqXHR.statusText);
+                }
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
